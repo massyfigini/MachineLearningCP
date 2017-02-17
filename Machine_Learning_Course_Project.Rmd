@@ -1,0 +1,160 @@
+---
+title: "Machine Learning Course Project"
+author: "Massimiliano Figini"
+date: "17/02/2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Course Project Instruction
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively.
+Six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E).
+
+The training data for this project are available here:  
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv  
+The test data are available here:  
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv  
+The data for this project come from this source:   http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.  
+
+*The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.*
+
+
+## Getting and cleaning data
+
+Load data and packages
+
+```{r getting, message=FALSE, warning=FALSE}
+TrainDownload <- "C:/Users/figinim/Documents/Studies/Machine Learning/Course Project/pml-training.csv"
+TestDownload <- "C:/Users/figinim/Documents/Studies/Machine Learning/Course Project/pml-testing.csv"
+train <- read.csv(TrainDownload)
+test <- read.csv(TestDownload)
+library(dplyr)
+library(caret)
+```
+
+Number of records per classe
+
+```{r exploring, message=FALSE, warning=FALSE}
+summarize(group_by(train, classe), Training=n())
+```
+
+There is a lot of data for every "classe" to do the algorithm.  
+  
+Find columns with lot NA or blank values
+
+```{r finding, message=FALSE, warning=FALSE}
+na <-sapply(train, function(y) sum(length(which(is.na(y)))))
+na <- data.frame(na)
+na <- tibble::rownames_to_column(na)
+blank <- sapply(train, function(y) sum(length(which(y==""))))
+blank <- data.frame(blank)
+blank <- tibble::rownames_to_column(blank)
+na_blank <- full_join(na, blank, by=c("rowname","rowname"))
+na_blank <- mutate(na_blank, NaBlank=na+blank, NaBlankPerc=(na+blank)/nrow(train)*100)
+filter(na_blank, NaBlank > 0)
+```
+
+100 of 160 variable are missing for 98% of the values. I exclude these and the other useless variable.
+
+```{r cleaning, message=FALSE, warning=FALSE}
+# Select only column with values
+not_na <- filter(na_blank, NaBlank == 0)
+Col <- not_na$rowname
+train <- select(train,one_of(Col))
+# exclude other useless variables
+train = train[-c(1,3,4,5,6,7)]
+```
+
+These are the columns used for the model.
+
+```{r finalData, message=FALSE, warning=FALSE}
+str(train)
+```
+
+
+## Split data
+
+I split the data in two group: one for build the model with 75% of cases, the second with the other 25% for test it.
+
+```{r training, message=FALSE, warning=FALSE}
+inTrain = createDataPartition(train$classe, p = 0.75, list=FALSE)
+MyTrain = train[inTrain,]
+MyTest = train[-inTrain,]
+```
+
+Now I use the training data for building the model
+
+
+## Models
+
+### Classification Tree
+
+First, I try with a Classification Tree model.
+
+```{r modelTree, message=FALSE, warning=FALSE}
+set.seed(26587)
+modelTree <- train(classe~., data = MyTrain[-1], method="rpart")
+modelTree
+```
+
+The accuracy is only 51%.  
+I test the model.  
+
+```{r predictionTree, message=FALSE, warning=FALSE}
+predTree <- predict(modelTree, newdata = MyTest)
+table(predTree,MyTest$classe)
+TruePredictionTree <- data.frame(classe=MyTest$classe,esito=predTree==MyTest$classe)
+frequenzeTree <- table(TruePredictionTree$classe,TruePredictionTree$esito)
+frequenzeTree
+prop.table(frequenzeTree,1)*100
+colSums(frequenzeTree)
+colSums(frequenzeTree)/sum(frequenzeTree)
+```
+
+As expected seeing the accuracy, not very well prediction, only about 50% true. Very bad in particular for classe D.
+
+
+### Random Forest
+
+I try with a Random Forest model, that should be more accurate.
+
+```{r modelRandomForest, message=FALSE, warning=FALSE}
+# NB: almost two hours of calculation for this model with my i5 2.20 GHz 8 GB RAM
+set.seed(26587)
+modelRF <- train(classe~., data = MyTrain[-1], method="rf")
+modelRF
+```
+
+I test the Random Forest model.
+
+```{r predictionRandomForest, message=FALSE, warning=FALSE}
+# Prediction on test with Random Forest model
+predRF <- predict(modelRF, newdata = MyTest)
+table(predRF,MyTest$classe)
+TruePredictionRF <- data.frame(classe=MyTest$classe,esito=predRF==MyTest$classe)
+frequenzeRF <- table(TruePredictionRF$classe,TruePredictionRF$esito)
+frequenzeRF
+prop.table(frequenzeRF,1)*100
+colSums(frequenzeRF)
+colSums(frequenzeRF)/sum(frequenzeRF)
+```
+
+Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records.
+
+
+## Prediction
+
+I make the prediction on the 20 cases provided.
+
+```{r TestPrediction, message=FALSE, warning=FALSE}
+predict(modelRF, newdata = test)
+20*0.994
+```
+
+I expect to have only 0.6% of error, so 20 on 20 or at least 19 on 20 of correct predictions.
