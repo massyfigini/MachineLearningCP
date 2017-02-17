@@ -404,7 +404,6 @@ I test the Random Forest model.
 
 
 ```r
-# Prediction on test with Random Forest model
 predRF <- predict(modelRF, newdata = MyTest)
 table(predRF,MyTest$classe)
 ```
