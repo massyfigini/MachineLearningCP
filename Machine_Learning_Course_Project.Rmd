@@ -147,7 +147,7 @@ colSums(frequenzeRF)/sum(frequenzeRF)
 Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records. So I choose this model for the final predictions.
 
 
-## Prediction
+## Predictions
 
 I make the prediction with the Random Forest model on the 20 cases provided.
 
