@@ -461,12 +461,12 @@ frequenzeRF</code></pre>
 <pre class="r"><code>colSums(frequenzeRF)/sum(frequenzeRF)</code></pre>
 <pre><code>##      FALSE       TRUE 
 ## 0.00591354 0.99408646</code></pre>
-<p>Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records.</p>
+<p>Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records. So I choose this model for the final predictions.</p>
 </div>
 </div>
 <div id="prediction" class="section level2">
-<h2>Prediction</h2>
-<p>I make the prediction on the 20 cases provided.</p>
+<h2>Predictions</h2>
+<p>I make the prediction with the Random Forest model on the 20 cases provided.</p>
 <pre class="r"><code>
 predict(modelRF, newdata = test)</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
