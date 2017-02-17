@@ -134,7 +134,6 @@ modelRF
 I test the Random Forest model.
 
 ```{r predictionRandomForest, message=FALSE, warning=FALSE}
-# Prediction on test with Random Forest model
 predRF <- predict(modelRF, newdata = MyTest)
 table(predRF,MyTest$classe)
 TruePredictionRF <- data.frame(classe=MyTest$classe,esito=predRF==MyTest$classe)
@@ -145,12 +144,12 @@ colSums(frequenzeRF)
 colSums(frequenzeRF)/sum(frequenzeRF)
 ```
 
-Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records.
+Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records. So I choose this model for the final predictions.
 
 
 ## Prediction
 
-I make the prediction on the 20 cases provided.
+I make the prediction with the Random Forest model on the 20 cases provided.
 
 ```{r TestPrediction, message=FALSE, warning=FALSE}
 predict(modelRF, newdata = test)
