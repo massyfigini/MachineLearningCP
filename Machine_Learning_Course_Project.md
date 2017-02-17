@@ -467,16 +467,15 @@ colSums(frequenzeRF)/sum(frequenzeRF)
 ## 0.00591354 0.99408646
 ```
 
-Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records.
+Random forest give us a very better prediction, 99,4% true: only 33 error on 4904 records. So I choose this model for the final predictions.
 
 
-## Prediction
+## Predictions
 
-I make the prediction on the 20 cases provided.
+I make the prediction with Random Forest model on the 20 cases provided.
 
 
 ```r
-# Final Prediction on the 20 test cases with Random Forest model
 predict(modelRF, newdata = test)
 ```
 
