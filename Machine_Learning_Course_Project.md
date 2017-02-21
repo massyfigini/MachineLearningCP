@@ -24,8 +24,8 @@ Load data and packages
 
 
 ```r
-TrainDownload <- "C:/Users/figinim/Documents/Studies/Machine Learning/Course Project/pml-training.csv"
-TestDownload <- "C:/Users/figinim/Documents/Studies/Machine Learning/Course Project/pml-testing.csv"
+TrainDownload <- "H:/Data Science Specialization/Machine Learning/Course Project/pml-training.csv"
+TestDownload <- "H:/Data Science Specialization/Machine Learning/Course Project/pml-testing.csv"
 train <- read.csv(TrainDownload)
 test <- read.csv(TestDownload)
 library(dplyr)
